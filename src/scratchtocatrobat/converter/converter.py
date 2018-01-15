@@ -205,6 +205,7 @@ class _ScratchToCatrobat(object):
     }
 
     complete_mapping = dict({
+
         #
         # Bricks
         #
@@ -314,6 +315,9 @@ class _ScratchToCatrobat(object):
         # custom block (user-defined)
         "call": None,
         "getParam": lambda variable_name, _: _variable_for(variable_name),
+
+        # testBlock tutorial
+        "testBlock": None,
 
         # pen bricks
         "putPenDown": catbricks.PenDownBrick,
@@ -2094,3 +2098,15 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             formula_element.value = arguments[0]
         return formula_element
 
+    @_register_handler(_block_name_to_handler_map, "testBlock")
+    def _convert_if_block(self):
+        assert len(self.arguments) == 3
+        formula_tree = catformula.FormulaElement(catElementType.OPERATOR, str(catformula.Operators.GREATER_THAN), None)
+        loudness = catformula.FormulaElement(catElementType.SENSOR, str(catformula.Sensors.LOUDNESS), None)
+        formula_tree.setLeftChild(loudness)
+        value = catformula.FormulaElement(catElementType.NUMBER, str(self.arguments[1]), None)
+        formula_tree.setRightChild(value)
+        if_begin_brick = catbricks.IfThenLogicBeginBrick(catformula.Formula(formula_tree))
+        if_end_brick = catbricks.IfThenLogicEndBrick(if_begin_brick)
+        sayBrick = catbricks.SayBubbleBrick("Hallo!")
+        return [if_begin_brick]+[sayBrick]+[if_end_brick]
