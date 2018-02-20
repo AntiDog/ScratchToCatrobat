@@ -1,0 +1,2 @@
+check if http://scratch2.catrob.at/ responds
+check if a conversion is possible for one specific scratchprogram
