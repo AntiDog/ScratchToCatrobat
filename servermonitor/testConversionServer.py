@@ -72,9 +72,8 @@ def testConversion(configParams):
 
     def retrieveInfo(ws):
         log.info("Starting retrieveInfo")
-        command = ClientRetrieveInfoCommand(configParams)
+        command = ClientRetrieveInfoCommand()
         command.execute(ws)
-        pass
 
     ws = None
     try:
