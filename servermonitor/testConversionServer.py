@@ -1,28 +1,47 @@
 import httplib
+import traceback
+import websocket
+
 from scratchtocatrobat.tools.logger import setup_logging
 from scratchtocatrobat.tools.logger import log
 from scratchtocatrobat.tools.helpers import _setup_configuration
-import traceback
-import websocket
-from websocketserver.protocol.command.command import COMMAND_AUTHENTICATE
-from websocketserver.protocol.command.command import COMMAND_RETRIEVE_INFO
-from websocketserver.protocol.command.command import COMMAND_SCHEDULE_JOB
+from ClientRetrieveInfoCommand import ClientRetrieveInfoCommand
+from ClientAuthenticateCommand import ClientAuthenticateCommand
+from ClientScheduleJobCommand import ClientScheduleJobCommand
 
 configpath = "config/default.ini"
+config = None
+
+class ConfigFileParams:
+    def __init__(self, conversionurl, clientId, scractchProjectId, webapirul):
+        self.conversionurl = conversionurl
+        self.clientId = clientId
+        self.scractchProjectId = scractchProjectId
+        self.webapirul = webapirul
+    conversionurl = None
+    clientId = None
+    scractchProjectId = None
+    webapirul  = None
+
+def readConfig():
+    config = _setup_configuration(configpath)
+    webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl") #http://scratch2.catrob.at/
+    conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl") #http://scratch2.catrob.at/convertersocket
+    clientId = config.config_parser.get("Scratch2CatrobatConverter", "clientid")
+    scractchProjectId = config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid")
+    return ConfigFileParams(conversionurl, clientId, scractchProjectId, webapirul)
 
 def main():
-    config = _setup_configuration(configpath)
     setup_logging()
-    webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl") #http://scratch2.catrob.at/
-    testWebApi(webapirul)
-    conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl") #http://scratch2.catrob.at/convertersocket
-    testConversion(conversionurl)
+    configParams = readConfig()
+    testWebApi(configParams.webapirul)
+    testConversion(configParams)
 
 
-def testWebApi(url):
+def testWebApi(webapirul):
     conn = None
     try:
-        conn = httplib.HTTPConnection(url)
+        conn = httplib.HTTPConnection(webapirul)
         conn.request("GET","/")
         r1 = conn.getresponse()
         status = r1.status
@@ -32,20 +51,44 @@ def testWebApi(url):
             log.error("WebApi Http status not OK, status is:" + str(status))
     except:
         log.error("Could not connect to WebApi:\n" + traceback.format_exc())
-    finally:
-        try:
-           conn.close()
-        except:
-            pass
+    try:
+        conn.close()
+    except:
+        pass
     return
 
 
-def testConversion(conversionurl):
-    ws = websocket.WebSocket()
-    ws.connect(conversionurl)
-    ws.send(COMMAND_AUTHENTICATE)
-    ws.send(COMMAND_SCHEDULE_JOB)
-    pass
+def testConversion(configParams):
+    def authenticate(ws):
+        log.info("Starting Authentication")
+        command = ClientAuthenticateCommand(configParams)
+        command.execute(ws)
+
+
+    def startConversion(ws):
+        log.info("Starting Conversion")
+        command = ClientScheduleJobCommand(configParams)
+        command.execute(ws)
+
+    def retrieveInfo(ws):
+        log.info("Starting retrieveInfo")
+        command = ClientRetrieveInfoCommand(configParams)
+        command.execute(ws)
+        pass
+
+    ws = None
+    try:
+        ws = websocket.create_connection(configParams.conversionurl)
+        authenticate(ws)
+        startConversion(ws)
+        retrieveInfo(ws)
+        ws.close()
+    except:
+        log.error("Exception while Conversion: "+traceback.format_exc())
+    try:
+        ws.close()
+    except:
+        pass
 
 
 if __name__ == '__main__':
