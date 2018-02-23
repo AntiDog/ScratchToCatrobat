@@ -21,7 +21,7 @@ class ConfigFileParams:
     conversionurl = None
     clientId = None
     scractchProjectId = None
-    webapirul  = None
+    webapirul = None
 
 def readConfig():
     config = _setup_configuration(configpath)
@@ -33,16 +33,16 @@ def readConfig():
 
 def main():
     setup_logging()
-    configParams = readConfig()
-    testWebApi(configParams.webapirul)
-    testConversion(configParams)
+    config_params = readConfig()
+    test_web_api(config_params.webapirul)
+    test_conversion(config_params)
 
 
-def testWebApi(webapirul):
+def test_web_api(webapirul):
     conn = None
     try:
         conn = httplib.HTTPConnection(webapirul)
-        conn.request("GET","/")
+        conn.request("GET", "/")
         r1 = conn.getresponse()
         status = r1.status
         if status == 200:
@@ -53,24 +53,23 @@ def testWebApi(webapirul):
         log.error("Could not connect to WebApi:\n" + traceback.format_exc())
     try:
         conn.close()
-    except:
+    except AttributeError:
         pass
     return
 
 
-def testConversion(configParams):
-    def authenticate(ws):
+def test_conversion(configParams):
+    def authenticate():
         log.info("Starting Authentication")
         command = ClientAuthenticateCommand(configParams)
         command.execute(ws)
 
-
-    def startConversion(ws):
+    def start_conversion():
         log.info("Starting Conversion")
         command = ClientScheduleJobCommand(configParams)
         command.execute(ws)
 
-    def retrieveInfo(ws):
+    def retrieve_info():
         log.info("Starting retrieveInfo")
         command = ClientRetrieveInfoCommand()
         command.execute(ws)
@@ -78,15 +77,15 @@ def testConversion(configParams):
     ws = None
     try:
         ws = websocket.create_connection(configParams.conversionurl)
-        authenticate(ws)
-        startConversion(ws)
-        retrieveInfo(ws)
+        authenticate()
+        start_conversion()
+        retrieve_info()
         ws.close()
     except:
         log.error("Exception while Conversion: "+traceback.format_exc())
     try:
         ws.close()
-    except:
+    except AttributeError:
         pass
 
 
