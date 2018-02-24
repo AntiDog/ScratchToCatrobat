@@ -79,6 +79,8 @@ def test_conversion(config_params):
         authenticate()
         start_conversion()
         retrieve_info()
+        #TODO: download project
+        #TODO: ensure validity of project (Not sure how, maybe hash value of the package?)
         ws.close()
     except:
         log.error("Exception while Conversion: " + traceback.format_exc())
