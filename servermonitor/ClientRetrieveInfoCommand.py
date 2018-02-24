@@ -24,7 +24,7 @@ class ClientRetrieveInfoCommand(ClientCommand):
             json_result = json.JSONDecoder('utf8').decode(result)
             if self.isDone(json_result):
                 break
-            time.sleep(0.1)
+            time.sleep(1)
         if ClientRetrieveInfoCommand.verify_response(json_result):
             log.info("Retrieve Info successful")
         else:
@@ -39,7 +39,10 @@ class ClientRetrieveInfoCommand(ClientCommand):
 
     @staticmethod
     def get_download_url(response, job_id):
+
         print response
+        if response["type"] == job_message.JobMessage.MessageType.JOB_CONVERSION_FINISHED:
+            return response["data"]["url"]
         for jobinfo in response["data"]["jobsInfo"]:
             if jobinfo["jobID"] == job_id:
                 url = jobinfo["downloadURL"]
@@ -52,8 +55,9 @@ class ClientRetrieveInfoCommand(ClientCommand):
                 log.info("progress: " + str(jobinfo["progress"]) + "%")
             return False
 
-        if json_result["type"] == job_message.JobMessage.MessageType.JOB_CONVERSION_FINISHED:
-            return True
         if json_result["type"] == job_message.JobMessage.MessageType.JOB_RUNNING:
             return False
+        if json_result["type"] == job_message.JobMessage.MessageType.JOB_CONVERSION_FINISHED:
+            return True
+        log.error("unexpected message type: "+ str(json_result["type"]))
         raise NotImplemented
