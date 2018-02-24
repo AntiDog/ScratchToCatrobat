@@ -76,7 +76,7 @@ def test_conversion(config_params):
         command.execute(ws)
 
     def retrieve_info():
-        command = ClientRetrieveInfoCommand()
+        command = ClientRetrieveInfoCommand(config_params)
         return command.execute(ws)
 
     def download_project():

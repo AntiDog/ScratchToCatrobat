@@ -7,7 +7,7 @@ from websocketserver.protocol.message.job import job_message
 
 class ClientScheduleJobCommand(ClientCommand):
     def __init__(self, config_params):
-        args = {ClientCommand.ArgumentType.JOB_ID: int(config_params.scractchprojectid)}
+        args = {ClientCommand.ArgumentType.JOB_ID: int(config_params.scractchprojectid),  ClientCommand.ArgumentType.FORCE:1}
         ClientCommand.__init__(self, COMMAND_SCHEDULE_JOB, args)
 
     def execute(self, ws):
