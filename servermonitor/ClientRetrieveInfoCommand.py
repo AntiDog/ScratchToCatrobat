@@ -5,7 +5,6 @@ import time
 from ClientCommand import ClientCommand
 from websocketserver.protocol.command.command import COMMAND_RETRIEVE_INFO
 from scratchtocatrobat.tools.logger import log
-from websocketserver.protocol.message.base.base_message import BaseMessage
 from websocketserver.protocol.message.job import job_message
 
 class ClientRetrieveInfoCommand(ClientCommand):
