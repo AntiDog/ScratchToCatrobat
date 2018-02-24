@@ -22,8 +22,17 @@ class ClientRetrieveInfoCommand(ClientCommand):
             log.error("Bad retrieve Info response")
         return json.JSONDecoder('utf8').decode(result)
 
+    @staticmethod
     def verify_response( encoded_response):
         response = json.JSONDecoder('utf8').decode(encoded_response)
-        # TODO: more checks(if necessary) & make sure it is finished
         return response["type"] == BaseMessage.MessageType.INFO
-    verify_response = staticmethod(verify_response)
+
+        # TODO: more checks(if necessary) & make sure it is finished
+
+    @staticmethod
+    def get_download_url(response, job_id):
+        print response
+        for jobinfo in response["data"]["jobsInfo"]:
+            if jobinfo["jobID"] == job_id:
+                url = jobinfo["downloadURL"]
+                return url

@@ -21,7 +21,7 @@ class ClientAuthenticateCommand(ClientCommand):
         else:
             log.error("Bad Authentication response")
 
+    @staticmethod
     def verify_response( encoded_response):
         response = json.JSONDecoder('utf8').decode(encoded_response)
         return response["type"] == BaseMessage.MessageType.CLIENT_ID
-    verify_response = staticmethod(verify_response)
