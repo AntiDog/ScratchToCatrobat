@@ -1,6 +1,9 @@
+import json
+
 from ClientCommand import ClientCommand
 from websocketserver.protocol.command.command import COMMAND_RETRIEVE_INFO
 from scratchtocatrobat.tools.logger import log
+from websocketserver.protocol.message.base.base_message import BaseMessage
 
 
 class ClientScheduleJobCommand(ClientCommand):
@@ -10,8 +13,17 @@ class ClientScheduleJobCommand(ClientCommand):
 
     def execute(self, ws):
         data = self.to_json().encode('utf8')
-        log.info("ScheduleJobCommand Sending {}".format(data))
+        log.debug("ScheduleJobCommand Sending {}".format(data))
         ws.send(data)
-        result = ws.recv()
-        log.info("ScheduleJobCommand Response Received {}".format(result))
-        return result
+        response = ws.recv()
+        log.debug("ScheduleJobCommand Response Received {}".format(response))
+        if ClientScheduleJobCommand.verify_response(response):
+            log.info("ScheduleJobCommand successful")
+        else:
+            log.error("Bad ScheduleJobCommand response")
+
+
+    def verify_response( encoded_response):
+        response = json.JSONDecoder('utf8').decode(encoded_response)
+        return response["type"] == BaseMessage.MessageType.INFO
+    verify_response = staticmethod(verify_response)

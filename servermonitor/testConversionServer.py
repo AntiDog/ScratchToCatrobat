@@ -13,23 +13,25 @@ configpath = "config/default.ini"
 config = None
 
 class ConfigFileParams:
-    def __init__(self, conversionurl, clientId, scractchProjectId, webapirul):
+    def __init__(self, conversionurl, clientid, scractchprojectid, webapirul):
         self.conversionurl = conversionurl
-        self.clientId = clientId
-        self.scractchProjectId = scractchProjectId
+        self.clientid = clientid
+        self.scractchprojectid = scractchprojectid
         self.webapirul = webapirul
     conversionurl = None
-    clientId = None
-    scractchProjectId = None
+    clientid = None
+    scractchprojectid = None
     webapirul = None
+
 
 def readConfig():
     config = _setup_configuration(configpath)
-    webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl") #http://scratch2.catrob.at/
-    conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl") #http://scratch2.catrob.at/convertersocket
-    clientId = config.config_parser.get("Scratch2CatrobatConverter", "clientid")
-    scractchProjectId = config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid")
-    return ConfigFileParams(conversionurl, clientId, scractchProjectId, webapirul)
+    webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl")
+    conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl")
+    clientid = config.config_parser.get("Scratch2CatrobatConverter", "clientid")
+    scractchprojectid = config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid")
+    return ConfigFileParams(conversionurl, clientid, scractchprojectid, webapirul)
+
 
 def main():
     setup_logging()
@@ -58,31 +60,28 @@ def test_web_api(webapirul):
     return
 
 
-def test_conversion(configParams):
+def test_conversion(config_params):
     def authenticate():
-        log.info("Starting Authentication")
-        command = ClientAuthenticateCommand(configParams)
+        command = ClientAuthenticateCommand(config_params)
         command.execute(ws)
 
     def start_conversion():
-        log.info("Starting Conversion")
-        command = ClientScheduleJobCommand(configParams)
+        command = ClientScheduleJobCommand(config_params)
         command.execute(ws)
 
     def retrieve_info():
-        log.info("Starting retrieveInfo")
         command = ClientRetrieveInfoCommand()
         command.execute(ws)
 
     ws = None
     try:
-        ws = websocket.create_connection(configParams.conversionurl)
+        ws = websocket.create_connection(config_params.conversionurl)
         authenticate()
         start_conversion()
         retrieve_info()
         ws.close()
     except:
-        log.error("Exception while Conversion: "+traceback.format_exc())
+        log.error("Exception while Conversion: " + traceback.format_exc())
     try:
         ws.close()
     except AttributeError:
