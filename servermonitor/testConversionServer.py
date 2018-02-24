@@ -13,11 +13,12 @@ configpath = "config/default.ini"
 config = None
 
 class ConfigFileParams:
-    def __init__(self, conversionurl, clientid, scractchprojectid, webapirul):
+    def __init__(self, conversionurl, clientid, scractchprojectid, webapirul, downloadurl):
         self.conversionurl = conversionurl
         self.clientid = clientid
         self.scractchprojectid = scractchprojectid
         self.webapirul = webapirul
+        self.downloadurl = downloadurl
     conversionurl = None
     clientid = None
     scractchprojectid = None
@@ -30,7 +31,8 @@ def readConfig():
     conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl")
     clientid = config.config_parser.get("Scratch2CatrobatConverter", "clientid")
     scractchprojectid = config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid")
-    return ConfigFileParams(conversionurl, clientid, scractchprojectid, webapirul)
+    downloadurl = config.config_parser.get("Scratch2CatrobatConverter", "downloadurl")
+    return ConfigFileParams(conversionurl, clientid, scractchprojectid, webapirul, downloadurl)
 
 
 def main():
@@ -59,7 +61,6 @@ def test_web_api(webapirul):
         pass
     return
 
-
 def test_conversion(config_params):
     def authenticate():
         command = ClientAuthenticateCommand(config_params)
@@ -71,15 +72,38 @@ def test_conversion(config_params):
 
     def retrieve_info():
         command = ClientRetrieveInfoCommand()
-        command.execute(ws)
+        return command.execute(ws)
+
+    def download_project(download_path):
+        conn = httplib.HTTPConnection(config_params.downloadurl)
+        conn.request("GET", download_path)
+        print(config_params.downloadurl+download_path)
+        r1 = conn.getresponse()
+        status = r1.status
+        if status == 200:
+            log.info("Download Project Http status OK")
+            return r1.read() #TODO: I don't think this works the way i think it does
+        else:
+            log.error("Download Project Http status not OK, status is:" + str(status))
+
+        pass
+
+    def validate_ziped_project(project):
+        shouldbe = 6998348270307054976 #6998348270307054976
+        if hash(project) == shouldbe: # hash() doesn't work for some reason
+            log.info("Project hash OK")
+        else:
+            log.error("Project hash unexpected, has was: " + str(hash(project))
+                      + " but should be: " + str(shouldbe))
 
     ws = None
     try:
         ws = websocket.create_connection(config_params.conversionurl)
         authenticate()
         start_conversion()
-        retrieve_info()
-        #TODO: download project
+        result = retrieve_info()
+        ziped_project = download_project(result["data"]["jobsInfo"][0]["downloadURL"])
+        validate_ziped_project(ziped_project)
         #TODO: ensure validity of project (Not sure how, maybe hash value of the package?)
         ws.close()
     except:

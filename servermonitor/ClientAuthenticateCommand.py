@@ -7,7 +7,7 @@ from websocketserver.protocol.message.base.base_message import BaseMessage
 
 class ClientAuthenticateCommand(ClientCommand):
     def __init__(self, config_params):
-        args = {ClientCommand.ArgumentType.CLIENT_ID: int(config_params.clientId)}
+        args = {ClientCommand.ArgumentType.CLIENT_ID: int(config_params.clientid)}
         ClientCommand.__init__(self, COMMAND_AUTHENTICATE, args)
 
     def execute(self, ws):

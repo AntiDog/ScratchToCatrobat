@@ -14,13 +14,13 @@ class ClientRetrieveInfoCommand(ClientCommand):
         log.debug("RetrieveInfoCommand Sending {}".format(data))
         ws.send(data)
         result = ws.recv()
-        log.debug("RetrieveInfoCommand Response Received {}".format(result))
+        log.info("RetrieveInfoCommand Response Received {}".format(result))
 
         if ClientRetrieveInfoCommand.verify_response(result):
             log.info("Retrieve Info successful")
         else:
             log.error("Bad retrieve Info response")
-        return
+        return json.JSONDecoder('utf8').decode(result)
 
     def verify_response( encoded_response):
         response = json.JSONDecoder('utf8').decode(encoded_response)

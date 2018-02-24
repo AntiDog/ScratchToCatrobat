@@ -8,7 +8,7 @@ from websocketserver.protocol.message.base.base_message import BaseMessage
 
 class ClientScheduleJobCommand(ClientCommand):
     def __init__(self, config_params):
-        args = {ClientCommand.ArgumentType.JOB_ID: config_params.scractchProjectId}
+        args = {ClientCommand.ArgumentType.JOB_ID: config_params.scractchprojectid}
         ClientCommand.__init__(self, COMMAND_RETRIEVE_INFO, args)
 
     def execute(self, ws):
