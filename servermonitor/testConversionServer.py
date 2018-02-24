@@ -3,6 +3,7 @@ import traceback
 import os
 import websocket
 import zipfile
+import logging
 
 from scratchtocatrobat.tools.logger import setup_logging
 from scratchtocatrobat.tools.logger import log
@@ -42,6 +43,8 @@ def readConfig():
 
 def main():
     setup_logging()
+    _logger = logging.getLogger('websocket')
+    _logger.addHandler(logging.NullHandler())
     config_params = readConfig()
     test_web_api(config_params.webapirul)
     test_conversion(config_params)
@@ -80,7 +83,6 @@ def test_conversion(config_params):
         return command.execute(ws)
 
     def download_project():
-        print(config_params.downloadurl + download_path)
         conn = httplib.HTTPConnection(config_params.downloadurl)
         conn.request("GET", download_path)
         r1 = conn.getresponse()
@@ -121,8 +123,6 @@ def test_conversion(config_params):
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
         ziped_project = download_project()
         validate_ziped_project()
-        #TODO: ensure validity of project (Not sure how, maybe hash value of the package?)
-        ws.close()
     except:
         log.error("Exception while Conversion: " + traceback.format_exc())
     try:

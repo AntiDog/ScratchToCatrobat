@@ -14,6 +14,7 @@ class ClientRetrieveInfoCommand(ClientCommand):
         ClientCommand.__init__(self, COMMAND_RETRIEVE_INFO, args)
 
     def execute(self, ws):
+        result = None
         while(True):
             data = self.to_json().encode('utf8')
             log.debug("RetrieveInfoCommand Sending {}".format(data))
@@ -25,22 +26,11 @@ class ClientRetrieveInfoCommand(ClientCommand):
             if self.isDone(json_result):
                 break
             time.sleep(1)
-        if ClientRetrieveInfoCommand.verify_response(json_result):
-            log.info("Retrieve Info successful")
-        else:
-            log.error("Bad retrieve Info response")
         return json.JSONDecoder('utf8').decode(result)
 
-    @staticmethod
-    def verify_response( json_result):
-        return json_result["type"] == BaseMessage.MessageType.INFO
-
-        # TODO: more checks(if necessary) & make sure it is finished
 
     @staticmethod
     def get_download_url(response, job_id):
-
-        print response
         if response["type"] == job_message.JobMessage.MessageType.JOB_CONVERSION_FINISHED:
             return response["data"]["url"]
         for jobinfo in response["data"]["jobsInfo"]:
