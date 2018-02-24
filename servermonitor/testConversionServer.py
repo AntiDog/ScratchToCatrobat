@@ -123,6 +123,7 @@ def test_conversion(config_params):
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
         ziped_project = download_project()
         validate_ziped_project()
+        #TODO send mail on fail
     except:
         log.error("Exception while Conversion: " + traceback.format_exc())
     try:
