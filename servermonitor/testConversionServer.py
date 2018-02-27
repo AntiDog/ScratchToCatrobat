@@ -1,9 +1,11 @@
 import httplib
 import traceback
 import os
+
 import websocket
 import zipfile
 import logging
+from SmtpUtility import SmtpUtility
 
 from scratchtocatrobat.tools.logger import setup_logging
 from scratchtocatrobat.tools.logger import log
@@ -13,45 +15,60 @@ from ClientAuthenticateCommand import ClientAuthenticateCommand
 from ClientScheduleJobCommand import ClientScheduleJobCommand
 
 configpath = "config/default.ini"
-config = None
-
+smtp = None
 class ConfigFileParams:
-    def __init__(self, conversionurl, clientid, scractchprojectid, webapirul, downloadurl, code_xml_hash):
-        self.conversionurl = conversionurl
-        self.clientid = int(clientid)
-        self.scractchprojectid = int(scractchprojectid)
-        self.webapirul = webapirul
-        self.downloadurl = downloadurl
-        self.code_xml_hash = int(code_xml_hash)
+    def __init__(self): pass
+    class Mailinfo(object):
+        smtp_host = None
+        smtp_port = None
+        smtp_from = None
+        smtp_pwd = None
+        smtp_send_to = []
+        def __init__(self): pass
+
     conversionurl = None
     clientid = None
     scractchprojectid = None
     webapirul = None
     code_xml_hash = None
+    mailinfo = Mailinfo()
 
 
 def readConfig():
+    global configpath
     config = _setup_configuration(configpath)
-    webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl")
-    conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl")
-    clientid = config.config_parser.get("Scratch2CatrobatConverter", "clientid")
-    scractchprojectid = config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid")
-    downloadurl = config.config_parser.get("Scratch2CatrobatConverter", "downloadurl")
-    code_xml_hash = config.config_parser.get("Scratch2CatrobatConverter", "code_xml_hash")
-    return ConfigFileParams(conversionurl, clientid, scractchprojectid, webapirul, downloadurl, code_xml_hash)
+    config_params = ConfigFileParams()
+    config_params.webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl")
+    config_params.conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl")
+    config_params.clientid = int(config.config_parser.get("Scratch2CatrobatConverter", "clientid"))
+    config_params.scractchprojectid = int(config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid"))
+    config_params.downloadurl = config.config_parser.get("Scratch2CatrobatConverter", "downloadurl")
+    config_params.code_xml_hash = int(config.config_parser.get("Scratch2CatrobatConverter", "code_xml_hash"))
 
+    config_params.mailinfo.smtp_host = config.config_parser.get("MAIL", "smtp_host")
+    config_params.mailinfo.smtp_from = config.config_parser.get("MAIL", "smtp_from")
+    config_params.mailinfo.smtp_port = config.config_parser.get("MAIL", "smtp_port")
+    config_params.mailinfo.smtp_pwd = config.config_parser.get("MAIL", "smtp_pwd")
+    config_params.mailinfo.smtp_send_to = config.config_parser.get("MAIL", "smtp_send_to")
+
+    return config_params
 
 def main():
     setup_logging()
     _logger = logging.getLogger('websocket')
     _logger.addHandler(logging.NullHandler())
     config_params = readConfig()
-    test_web_api(config_params.webapirul)
-    test_conversion(config_params)
+    failure = False
+    failure |= test_web_api(config_params.webapirul)
+    failure |= test_conversion(config_params)
+    #TODO: untested! Test this please!
+    if failure:
+        SmtpUtility.send(config_params.mailinfo, "Everything is OK. Was just joking.")
 
 
 def test_web_api(webapirul):
     conn = None
+    failed = True
     try:
         conn = httplib.HTTPConnection(webapirul)
         conn.request("GET", "/")
@@ -59,6 +76,7 @@ def test_web_api(webapirul):
         status = r1.status
         if status == 200:
             log.info("WebApi is up and running")
+            failed = False
         else:
             log.error("WebApi Http status not OK, status is:" + str(status))
     except:
@@ -67,7 +85,8 @@ def test_web_api(webapirul):
         conn.close()
     except AttributeError:
         pass
-    return
+    return failed
+
 
 def test_conversion(config_params):
     def authenticate():
@@ -96,6 +115,7 @@ def test_conversion(config_params):
         pass
 
     def validate_ziped_project():
+        failed = False
         if not os.path.isdir("tmp/"):
             os.makedirs("tmp/")
         file = open("tmp/project.zip","wb")
@@ -111,8 +131,10 @@ def test_conversion(config_params):
         else:
             log.error("Project hash unexpected, has: " + str(hash(xml_file_content))
                       + " but should be: " + str(config_params.code_xml_hash))
+            failed = True
         os.remove("tmp/project.zip")
         os.remove("tmp/code.xml")
+        return failed
 
     ws = None
     try:
@@ -122,14 +144,17 @@ def test_conversion(config_params):
         result = retrieve_info()
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
         ziped_project = download_project()
-        validate_ziped_project()
-        #TODO send mail on fail
+        failed = validate_ziped_project()
+        #TODO check without force flag if cash works
+
     except:
         log.error("Exception while Conversion: " + traceback.format_exc())
+        failed = True
     try:
         ws.close()
     except AttributeError:
         pass
+    return failed
 
 
 if __name__ == '__main__':
