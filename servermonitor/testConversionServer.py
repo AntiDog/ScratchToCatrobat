@@ -24,7 +24,7 @@ class ConfigFileParams:
         smtp_port = None
         smtp_from = None
         smtp_pwd = None
-        smtp_send_to = []
+        smtp_send_to = None
         def __init__(self): pass
 
         def to_json(self):
@@ -45,16 +45,16 @@ def readConfig():
     config_params = ConfigFileParams()
     config_params.webapirul = config.config_parser.get("Scratch2CatrobatConverter", "webapiurl")
     config_params.conversionurl = config.config_parser.get("Scratch2CatrobatConverter", "conversionurl")
-    config_params.clientid = int(config.config_parser.get("Scratch2CatrobatConverter", "clientid"))
-    config_params.scractchprojectid = int(config.config_parser.get("Scratch2CatrobatConverter", "scratchprojectid"))
+    config_params.clientid = config.config_parser.getint("Scratch2CatrobatConverter", "clientid")
+    config_params.scractchprojectid = config.config_parser.getint("Scratch2CatrobatConverter", "scratchprojectid")
     config_params.downloadurl = config.config_parser.get("Scratch2CatrobatConverter", "downloadurl")
-    config_params.code_xml_hash = int(config.config_parser.get("Scratch2CatrobatConverter", "code_xml_hash"))
+    config_params.code_xml_hash = config.config_parser.getint("Scratch2CatrobatConverter", "code_xml_hash")
 
     config_params.mailinfo.smtp_host = config.config_parser.get("MAIL", "smtp_host")
     config_params.mailinfo.smtp_from = config.config_parser.get("MAIL", "smtp_from")
     config_params.mailinfo.smtp_port = config.config_parser.get("MAIL", "smtp_port")
     config_params.mailinfo.smtp_pwd = config.config_parser.get("MAIL", "smtp_pwd")
-    config_params.mailinfo.smtp_send_to = config.config_parser.get("MAIL", "smtp_send_to")
+    config_params.mailinfo.smtp_send_to = config.config_parser.get("MAIL", "smtp_send_to")[1:-1].split(",")
 
     return config_params
 

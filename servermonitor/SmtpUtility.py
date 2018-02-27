@@ -3,16 +3,13 @@ import smtplib
 class SmtpUtility():
     @staticmethod
     def send(mailprops, content):
-        print ""+mailprops.to_json()
-        msg = ("From: %s\r\nTo: %s\r\n\r\n"
+        msg = ("From: %s\r\Subject: Scratch2Catrobat Converter issue\r\nTo: %s\r\n\r\n"
                % (mailprops.smtp_from, ", ".join(mailprops.smtp_send_to)))
         msg = msg + content
-        server = smtplib.SMTP(mailprops.smtp_host, int(mailprops.smtp_port))
+        server = smtplib.SMTP_SSL(mailprops.smtp_host, int(mailprops.smtp_port))
         server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.set_debuglevel(1)
         server.login(mailprops.smtp_from, mailprops.smtp_pwd)
-        server.sendmail(mailprops.smtp_from, mailprops.smtp_send_to, msg)
+        send_to = ", ".join(mailprops.smtp_send_to)
+        server.sendmail(mailprops.smtp_from, send_to, msg)
         server.quit()
         pass
