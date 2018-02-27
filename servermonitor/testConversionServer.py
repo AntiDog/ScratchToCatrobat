@@ -1,4 +1,5 @@
 import httplib
+import json
 import traceback
 import os
 
@@ -25,6 +26,10 @@ class ConfigFileParams:
         smtp_pwd = None
         smtp_send_to = []
         def __init__(self): pass
+
+        def to_json(self):
+            return json.dumps(self, default=lambda o: o.__dict__,
+                              sort_keys=True, indent=4)
 
     conversionurl = None
     clientid = None
@@ -62,7 +67,7 @@ def main():
     failure |= test_web_api(config_params.webapirul)
     failure |= test_conversion(config_params)
     #TODO: untested! Test this please!
-    if failure:
+    if failure | True:
         SmtpUtility.send(config_params.mailinfo, "Everything is OK. Was just joking.")
 
 
@@ -143,6 +148,7 @@ def test_conversion(config_params):
         start_conversion()
         result = retrieve_info()
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
+        #todo there is something worng here i guess? hash isn't always right :(
         ziped_project = download_project()
         failed = validate_ziped_project()
         #TODO check without force flag if cash works
