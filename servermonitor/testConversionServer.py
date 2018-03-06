@@ -6,6 +6,8 @@ import os
 import websocket
 import zipfile
 import logging
+
+import scratchtocatrobat
 from SmtpUtility import SmtpUtility
 
 from scratchtocatrobat.tools.logger import setup_logging
@@ -17,6 +19,7 @@ from ClientScheduleJobCommand import ClientScheduleJobCommand
 
 configpath = "config/default.ini"
 smtp = None
+
 class ConfigFileParams:
     def __init__(self): pass
     class Mailinfo(object):
@@ -67,8 +70,14 @@ def main():
     failure |= test_web_api(config_params.webapirul)
     failure |= test_conversion(config_params)
     if failure:
-        SmtpUtility.send(config_params.mailinfo, "")
+        mailcontent = "There was an error at converting. Log is:\n" +getlog()
+        SmtpUtility.send(config_params.mailinfo, mailcontent)
 
+def getlog():
+    file = open(scratchtocatrobat.tools.logger.log_file, "r")
+    content = file.read()
+    file.close()
+    return content
 
 def test_web_api(webapirul):
     conn = None
@@ -147,7 +156,7 @@ def test_conversion(config_params):
         start_conversion()
         result = retrieve_info()
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
-        #todo there is something worng here i guess? hash isn't always right :(
+        #TODO there is something worng here i guess? hash isn't always the same??? :(
         ziped_project = download_project()
         failed = validate_ziped_project()
         #TODO check without force flag if cash works
