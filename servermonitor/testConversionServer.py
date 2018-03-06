@@ -66,9 +66,8 @@ def main():
     failure = False
     failure |= test_web_api(config_params.webapirul)
     failure |= test_conversion(config_params)
-    #TODO: untested! Test this please!
-    if failure | True:
-        SmtpUtility.send(config_params.mailinfo, "Everything is OK. Was just joking.")
+    if failure:
+        SmtpUtility.send(config_params.mailinfo, "")
 
 
 def test_web_api(webapirul):
@@ -112,7 +111,7 @@ def test_conversion(config_params):
         r1 = conn.getresponse()
         status = r1.status
         if status == 200:
-            log.info("Download Project Http status OK")
+            log.info("Download Project Http status OK: "+ config_params.downloadurl+download_path)
             return r1.read()
         else:
             log.error("Download Project Http status not OK, status is:" + str(status))

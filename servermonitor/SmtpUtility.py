@@ -3,7 +3,7 @@ import smtplib
 class SmtpUtility():
     @staticmethod
     def send(mailprops, content):
-        msg = ("From: %s\r\Subject: Scratch2Catrobat Converter issue\r\nTo: %s\r\n\r\n"
+        msg = ("From: %s\r\nSubject: Scratch2Catrobat Converter issue\r\nTo: %s\r\n\r\n"
                % (mailprops.smtp_from, ", ".join(mailprops.smtp_send_to)))
         msg = msg + content
         server = smtplib.SMTP_SSL(mailprops.smtp_host, int(mailprops.smtp_port))
