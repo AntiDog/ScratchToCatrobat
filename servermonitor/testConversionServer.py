@@ -71,7 +71,7 @@ def main():
     failure |= test_conversion(config_params)
     if failure:
         mailcontent = "There was an error at converting. Log is:\n" +getlog()
-        SmtpUtility.send(config_params.mailinfo, mailcontent)
+        log.info(SmtpUtility.send(config_params.mailinfo, mailcontent))
 
 def getlog():
     file = open(scratchtocatrobat.tools.logger.log_file, "r")
@@ -156,10 +156,10 @@ def test_conversion(config_params):
         start_conversion()
         result = retrieve_info()
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
-        #TODO there is something worng here i guess? hash isn't always the same??? :(
+        #TODO: there is something worng here i guess? hash isn't always the same??? :(
         ziped_project = download_project()
         failed = validate_ziped_project()
-        #TODO check without force flag if cash works
+        #TODO: check without force flag if caching works
 
     except:
         log.error("Exception while Conversion: " + traceback.format_exc())
