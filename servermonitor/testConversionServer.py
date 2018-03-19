@@ -20,6 +20,18 @@ from ClientScheduleJobCommand import ClientScheduleJobCommand
 configpath = "config/default.ini"
 smtp = None
 
+def main():
+    setup_logging()
+    _logger = logging.getLogger('websocket')
+    _logger.addHandler(logging.NullHandler())
+    config_params = readConfig()
+    failure = False
+    failure |= test_web_api(config_params.webapirul)
+    failure |= test_conversion(config_params)
+    if failure:
+        mailcontent = "There was an error at converting. Log is:\n" +getlog()
+        log.info(SmtpUtility.send(config_params.mailinfo, mailcontent))
+
 class ConfigFileParams:
     def __init__(self): pass
     class Mailinfo(object):
@@ -51,7 +63,7 @@ def readConfig():
     config_params.clientid = config.config_parser.getint("Scratch2CatrobatConverter", "clientid")
     config_params.scractchprojectid = config.config_parser.getint("Scratch2CatrobatConverter", "scratchprojectid")
     config_params.downloadurl = config.config_parser.get("Scratch2CatrobatConverter", "downloadurl")
-    config_params.code_xml_hash = config.config_parser.getint("Scratch2CatrobatConverter", "code_xml_hash")
+    config_params.checksum = config.config_parser.getint("Scratch2CatrobatConverter", "checksum")
 
     config_params.mailinfo.smtp_host = config.config_parser.get("MAIL", "smtp_host")
     config_params.mailinfo.smtp_from = config.config_parser.get("MAIL", "smtp_from")
@@ -61,17 +73,6 @@ def readConfig():
 
     return config_params
 
-def main():
-    setup_logging()
-    _logger = logging.getLogger('websocket')
-    _logger.addHandler(logging.NullHandler())
-    config_params = readConfig()
-    failure = False
-    failure |= test_web_api(config_params.webapirul)
-    failure |= test_conversion(config_params)
-    if failure:
-        mailcontent = "There was an error at converting. Log is:\n" +getlog()
-        log.info(SmtpUtility.send(config_params.mailinfo, mailcontent))
 
 def getlog():
     file = open(scratchtocatrobat.tools.logger.log_file, "r")
@@ -79,6 +80,7 @@ def getlog():
     file.close()
     return content
 
+#if scratch2catrobat site is shut down refactor this/remove it
 def test_web_api(webapirul):
     conn = None
     failed = True
@@ -127,6 +129,11 @@ def test_conversion(config_params):
 
         pass
 
+    def checksum(xml_file_content):
+        result = 0
+        for literal in xml_file_content: result += ord(literal)
+        return result
+
     def validate_ziped_project():
         failed = False
         if not os.path.isdir("tmp/"):
@@ -139,11 +146,13 @@ def test_conversion(config_params):
         file = open(xml_file_path,"r")
         xml_file_content = file.read()
         file.close()
-        if hash(xml_file_content) == config_params.code_xml_hash: # hash() doesn't work for some reason
-            log.info("Project hash OK")
+        # if hash(xml_file_content) == config_params.code_xml_hash: # hash() doesn't work because lines seem to be mixed up
+        checksum_of_xml_file = checksum(xml_file_content)
+        if  checksum_of_xml_file == config_params.checksum: # hash() doesn't work for some reason
+            log.info("Project checksum OK")
         else:
-            log.error("Project hash unexpected, has: " + str(hash(xml_file_content))
-                      + " but should be: " + str(config_params.code_xml_hash))
+            log.error("Project checksum unexpected, has: " + str(checksum_of_xml_file)
+                      + " but should be: " + str(config_params.checksum))
             failed = True
         os.remove("tmp/project.zip")
         os.remove("tmp/code.xml")
@@ -156,10 +165,13 @@ def test_conversion(config_params):
         start_conversion()
         result = retrieve_info()
         download_path = ClientRetrieveInfoCommand.get_download_url(result, config_params.scractchprojectid)
-        #TODO: there is something worng here i guess? hash isn't always the same??? :(
         ziped_project = download_project()
         failed = validate_ziped_project()
-        #TODO: check without force flag if caching works
+        # TODO: OK it looks like Hashing is implemented correctly however
+        #       the converter sometimes has a different line order
+        #       within the file which why the has isn't the same.
+        #       Maybe a simple checksum over all characters would be appropriate?
+        # TODO: check without force flag if caching works
 
     except:
         log.error("Exception while Conversion: " + traceback.format_exc())

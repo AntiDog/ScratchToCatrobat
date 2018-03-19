@@ -31,7 +31,6 @@ class ClientRetrieveInfoCommand(ClientCommand):
     @staticmethod
     def get_download_url(response, job_id):
         if response["type"] == job_message.JobMessage.MessageType.JOB_CONVERSION_FINISHED:
-            #TODO: This is worng i guess for multiple jobs?
             return response["data"]["url"]
         for jobinfo in response["data"]["jobsInfo"]:
             if jobinfo["jobID"] == job_id:
