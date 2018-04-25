@@ -230,7 +230,17 @@ class MediaConverter(object):
                     x, y, width, height = costume_info[JsonKeys.COSTUME_TEXT_RECT]
                     # TODO: extract RGBA
                     # text_color = costume_info[JsonKeys.COSTUME_TEXT_COLOR]
-                    [font_name, font_style] = costume_info[JsonKeys.COSTUME_FONT_NAME].split()
+                    print(costume_info[JsonKeys.COSTUME_FONT_NAME].split())
+                    font_name = image_processing._supported_fonts_path_mapping.keys()[0]
+                    font_style = "regular"
+                    if len(costume_info[JsonKeys.COSTUME_FONT_NAME].split()) == 2 :
+                        [font_name, font_style] = costume_info[JsonKeys.COSTUME_FONT_NAME].split()
+                    else:
+                        log.warning("font JSON parameters wrong '{0}', replacing with known font '{1}'".format(costume_info[JsonKeys.COSTUME_FONT_NAME], image_processing._supported_fonts_path_mapping.keys()[0]))
+
+                    if(font_name not in image_processing._supported_fonts_path_mapping):
+                        log.warning("font name '{0}' unknown, replacing with known font '{1}'".format(font_name, image_processing._supported_fonts_path_mapping.keys()[0]))
+                        font_name = image_processing._supported_fonts_path_mapping.keys()[0]
                     is_bold = font_style == "Bold"
                     is_italic = font_style == "Italic"
                     font_size = float(costume_info[JsonKeys.COSTUME_FONT_SIZE])
