@@ -235,11 +235,11 @@ class MediaConverter(object):
                         [font_name, font_style] = costume_info[JsonKeys.COSTUME_FONT_NAME].split()
                     else:
                         log.warning("font JSON parameters wrong '{0}', replacing with known font '{1}'".format(costume_info[JsonKeys.COSTUME_FONT_NAME], image_processing._supported_fonts_path_mapping.keys()[0]))
-                        font_scaling_factor = font_scaling_factor *1.1 # the original font might be smaller, better scale it down than cut it off
+                        font_scaling_factor = font_scaling_factor * 1.1 # the original font might be smaller, better scale it down than cut it off
                     if(font_name not in image_processing._supported_fonts_path_mapping):
                         log.warning("font name '{0}' unknown, replacing with known font '{1}'".format(font_name, image_processing._supported_fonts_path_mapping.keys()[0]))
                         font_name = image_processing._supported_fonts_path_mapping.keys()[0]
-                        font_scaling_factor = font_scaling_factor *1.1 # the original font might be smaller, better scale it down than cut it off
+                        font_scaling_factor = font_scaling_factor * 1.1 # the original font might be smaller, better scale it down than cut it off
                     is_bold = font_style == "Bold"
                     is_italic = font_style == "Italic"
                     font_size = float(costume_info[JsonKeys.COSTUME_FONT_SIZE]) / float(font_scaling_factor)
@@ -247,8 +247,10 @@ class MediaConverter(object):
                     font = image_processing.create_font(font_name, font_size, is_bold, is_italic)
                     assert font is not None
                     editable_image = image_processing.read_editable_image_from_disk(image_file_path)
-                    fonty = float(y)+(height*float(font_scaling_factor)/2.0) # I think this might not work if we rotate something outside of the picture
-                    editable_image = image_processing.add_text_to_image(editable_image, text, font, Color.BLACK, float(x), float(fonty), float(width), float(height))
+
+                    fontx = x #float(x) - (width * float(font_scaling_factor) / 2.0) # NOT working when scaling why?!
+                    fonty = float(y) + (height * float(font_scaling_factor) / 2.0) # I think this might not work if we rotate something outside of the picture
+                    editable_image = image_processing.add_text_to_image(editable_image, text, font, Color.BLACK, float(fontx), float(fonty), float(width), float(height))
                     # TODO: create duplicate...
                     # TODO: move test_converter.py to converter-python-package...
                     image_processing.save_editable_image_as_png_to_disk(editable_image, image_file_path, overwrite=True)
