@@ -247,11 +247,9 @@ class MediaConverter(object):
                     font = image_processing.create_font(font_name, font_size, is_bold, is_italic)
                     assert font is not None
                     editable_image = image_processing.read_editable_image_from_disk(image_file_path)
-                    #TODO: Is the + sign always right for this? Can it happen that we move it into wrong direction?
-                    #TODO: Do we need this for x as well?
                     fonty = float(y) + (height * float(font_scaling_factor) / 2.0) # I think this might not work if we rotate something outside of the picture
                     editable_image = image_processing.add_text_to_image(editable_image, text, font, Color.BLACK, float(x), float(fonty), float(width), float(height))
-                    
+
                     # TODO: create duplicate...
                     # TODO: move test_converter.py to converter-python-package...
                     image_processing.save_editable_image_as_png_to_disk(editable_image, image_file_path, overwrite=True)
