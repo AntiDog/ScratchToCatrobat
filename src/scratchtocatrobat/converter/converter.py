@@ -28,7 +28,6 @@ import types
 import zipfile
 import re
 from codecs import open
-
 from org.catrobat.catroid import ProjectManager
 import org.catrobat.catroid.common as catcommon
 import org.catrobat.catroid.content as catbase
@@ -1454,9 +1453,15 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
                 try:
                     # TODO: simplify
                     if try_number == 0:
-                        converted_args = [common.int_or_float(arg) or arg if isinstance(arg, (str, unicode)) else arg for arg in self.arguments]
+                        converted_args = [(common.int_or_float(arg) or arg if isinstance(arg, (str, unicode)) else arg) for arg in self.arguments]
                     elif try_number == 1:
-                        converted_args = [catformula.FormulaElement(catElementType.NUMBER, str(arg), None) if isinstance(arg, numbers.Number) else arg for arg in converted_args]  # @UndefinedVariable
+                        def handleBoolean(arg):
+                            if isinstance(arg, bool):
+                                return int(arg)
+                            else:
+                                return arg
+
+                        converted_args = [catformula.FormulaElement(catElementType.NUMBER, str(handleBoolean(arg)), None) if isinstance(arg, numbers.Number) else arg for arg in converted_args]  # @UndefinedVariable
                     elif try_number == 4:
                         converted_args = self.arguments
                     elif try_number == 2:
