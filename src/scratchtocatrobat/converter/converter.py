@@ -381,7 +381,7 @@ class _ScratchToCatrobat(object):
             background = catrobat.background_sprite_of(catrobat_project.getDefaultScene())
             background = sprite if background is None else background
             assert catrobat.is_background_sprite(background)
-            for look in background.getLookDataList():
+            for look in background.getLookList():
                 if arguments[0] == look.getName():
                     background_changes_script = catbase.WhenBackgroundChangesScript()
                     background_changes_script.setLook(look)
@@ -404,7 +404,7 @@ def _create_modified_formula_brick(sensor_type, unconverted_formula, catrobat_pr
 
     def _create_catrobat_sprite_stub(name=None):
         sprite = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, "WCTDummy" if name is None else name)
-        looks = sprite.getLookDataList()
+        looks = sprite.getLookList()
         for lookname in ["look1", "look2", "look3"]:
             looks.add(catrobat.create_lookdata(lookname, None))
         return sprite
@@ -633,6 +633,7 @@ class Converter(object):
                                                                  progress_bar, context)
         self._add_global_user_lists_to(_catr_scene)
         self._add_converted_sprites_to(_catr_scene)
+        print _catr_scene.project.sceneList[1].name
         self._add_key_sprites_to(_catr_scene, self.scratch_project.listened_keys)
         self.add_cursor_sprite_to(_catr_scene, context.upcoming_sprites)
         self._update_xml_header(_catr_project.getXmlHeader(), scratch_project.project_id,
@@ -669,7 +670,7 @@ class Converter(object):
         look.setName(MOUSE_SPRITE_NAME)
         mouse_filename = _generate_mouse_filename()
         look.fileName = mouse_filename
-        sprite.getLookDataList().add(look)
+        sprite.getLookList().add(look)
 
         if self.scratch_project._has_mouse_position_script:
             position_script = catbase.StartScript()
@@ -958,7 +959,6 @@ class _ScratchObjectConverter(object):
             elif current_costume_resolution != costume_resolution:
                 log.warning("Costume resolution not same for all costumes")
             sprite_looks.add(self._catrobat_look_from(scratch_costume))
-
         sprite_sounds = sprite.getSoundList()
         for scratch_sound in scratch_object.get_sounds():
             sprite_sounds.add(self._catrobat_sound_from(scratch_sound))
