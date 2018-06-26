@@ -666,9 +666,9 @@ class Converter(object):
             sprite = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, MOUSE_SPRITE_NAME)
 
         look = catcommon.LookData()
-        look.setLookName(MOUSE_SPRITE_NAME)
+        look.setName(MOUSE_SPRITE_NAME)
         mouse_filename = _generate_mouse_filename()
-        look.setLookFilename(mouse_filename)
+        look.fileName = mouse_filename
         sprite.getLookDataList().add(look)
 
         if self.scratch_project._has_mouse_position_script:
@@ -736,9 +736,9 @@ class Converter(object):
             add_sprite_to_scene = True
             key_sprite = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, key_message)
             key_look = catcommon.LookData()
-            key_look.setLookName(key_message)
-            key_look.setLookFilename(key_filename)
-            key_sprite.getLookDataList().add(key_look)
+            key_look.setName(key_message)
+            key_look.fileName = key_filename
+            key_sprite.getLookList().add(key_look)
 
             #set looks and position via started script
             when_started_script = catbase.StartScript()
@@ -771,9 +771,9 @@ class Converter(object):
             add_sprite_to_scene = True
             key_sprite = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, key_message)
             key_look = catcommon.LookData()
-            key_look.setLookName(key_message)
-            key_look.setLookFilename(key_filename)
-            key_sprite.getLookDataList().add(key_look)
+            key_look.setName(key_message)
+            key_look.fileName = key_filename
+            key_sprite.getLookList().add(key_look)
 
             #set looks and position via started script
             when_started_script = catbase.StartScript()
@@ -788,7 +788,7 @@ class Converter(object):
         when_tapped_script = catbase.WhenScript()
         #creating uservariable, add to script, set to 1
         bricks =[]
-        global_key_var_name = scratch.S2CC_KEY_VARIABLE_NAME + key;
+        global_key_var_name = scratch.S2CC_KEY_VARIABLE_NAME + key
         key_user_variable = catformula.UserVariable(global_key_var_name)
         key_user_variable.value = catformula.Formula(0)
         #catrobat.add_user_variable(catrobat_scene.getProject(), global_key_var_name)
