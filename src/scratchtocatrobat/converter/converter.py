@@ -1154,7 +1154,7 @@ class _ScratchObjectConverter(object):
         for variable_name in local_sprite_variables:
             user_variable = catrobat_scene.getDataContainer().getUserVariable(sprite, variable_name)
             show_variable_brick = catbricks.ShowTextBrick(context.visible_var_X, context.visible_var_Y)
-            show_variable_brick.setUserVariableName(variable_name)
+            show_variable_brick.userVariable.setName(variable_name)
             show_variable_brick.setUserVariable(user_variable)
             context.visible_var_Y -= VISIBLE_VAR_POSITION_STEP_Y
             if context.visible_var_Y <= VISIBLE_VAR_POSITION_THRESHOLD_Y:
@@ -1275,9 +1275,9 @@ class ConvertedProject(object):
             return sounds_path, images_path
 
         def program_source_for(catrobat_program):
-            storage_handler = catio.StorageHandler()
+            storage_handler = catio.XstreamSerializer.getInstance()
             code_xml_content = storage_handler.XML_HEADER
-            code_xml_content += storage_handler.getXMLStringOfAProject(catrobat_program)
+            code_xml_content += storage_handler.xstream.getProjectFromXML(catrobat_program)
             return code_xml_content
 
         def write_program_source(catrobat_program, context):

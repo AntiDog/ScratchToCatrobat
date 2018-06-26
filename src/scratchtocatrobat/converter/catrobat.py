@@ -67,8 +67,8 @@ def simple_name_for(brick):
 
 def create_lookdata(name, file_name):
     look_data = catcommon.LookData()
-    look_data.setLookName(name)
-    look_data.setLookFilename(file_name)
+    look_data.setName(name)
+    look_data.fileName = file_name
     return look_data
 
 
@@ -173,7 +173,7 @@ def defined_variable_names_in(project, sprite_name=None, sprite=None):
 def media_objects_in(project):
     scene = project.getDefaultScene()
     for sprite in scene.getSpriteList():
-        for media_object in itertools.chain(sprite.getLookDataList(), sprite.getSoundList()):
+        for media_object in itertools.chain(sprite.getLookList(), sprite.getSoundList()):
             yield media_object
 
 def add_to_start_script(bricks, sprite, position=0):

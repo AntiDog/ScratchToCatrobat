@@ -314,6 +314,7 @@ additional_serialization_classes:
     - SupportProject
     - SupportDataContainer
     - BroadcastMessageBrick
+    - XstreamSerializer
 
 
 preserved_interfaces:
