@@ -382,7 +382,7 @@ class _ScratchToCatrobat(object):
             background = sprite if background is None else background
             assert catrobat.is_background_sprite(background)
             for look in background.getLookDataList():
-                if arguments[0] == look.getLookName():
+                if arguments[0] == look.getName():
                     background_changes_script = catbase.WhenBackgroundChangesScript()
                     background_changes_script.setLook(look)
                     return background_changes_script
@@ -625,7 +625,7 @@ class Converter(object):
     def _converted_catrobat_program(self, progress_bar=None, context=None):
         scratch_project = self.scratch_project
         _catr_project = catbase.Project(None, scratch_project.name)
-        _catr_scene = catbase.Scene(None, CATROBAT_DEFAULT_SCENE_NAME, _catr_project)
+        _catr_scene = catbase.Scene( CATROBAT_DEFAULT_SCENE_NAME, _catr_project)
         _catr_project.sceneList.add(_catr_scene)
         ProjectManager.getInstance().setProject(_catr_project)
 
@@ -949,7 +949,7 @@ class _ScratchObjectConverter(object):
             sprite_context.name = sprite.getName()
 
         # looks and sounds has to added first because of cross-validations
-        sprite_looks = sprite.getLookDataList()
+        sprite_looks = sprite.getLookList()
         costume_resolution = None
         for scratch_costume in scratch_object.get_costumes():
             current_costume_resolution = scratch_costume.get(scratchkeys.COSTUME_RESOLUTION)
@@ -1016,12 +1016,12 @@ class _ScratchObjectConverter(object):
 
         assert scratchkeys.COSTUME_NAME in scratch_costume
         costume_name = scratch_costume[scratchkeys.COSTUME_NAME]
-        look.setLookName(costume_name)
+        look.setName(costume_name)
 
         assert scratchkeys.COSTUME_MD5 in scratch_costume
         costume_md5_filename = scratch_costume[scratchkeys.COSTUME_MD5]
         costume_resource_name = scratch_costume[scratchkeys.COSTUME_NAME]
-        look.setLookFilename(mediaconverter.catrobat_resource_file_name_for(costume_md5_filename, costume_resource_name))
+        look.fileName = (mediaconverter.catrobat_resource_file_name_for(costume_md5_filename, costume_resource_name))
         return look
 
     @staticmethod
@@ -1030,12 +1030,12 @@ class _ScratchObjectConverter(object):
 
         assert scratchkeys.SOUND_NAME in scratch_sound
         sound_name = scratch_sound[scratchkeys.SOUND_NAME]
-        soundinfo.setTitle(sound_name)
+        soundinfo.setName(sound_name)
 
         assert scratchkeys.SOUND_MD5 in scratch_sound
         sound_md5_filename = scratch_sound[scratchkeys.SOUND_MD5]
         sound_resource_name = scratch_sound[scratchkeys.SOUND_NAME]
-        soundinfo.setSoundFileName(mediaconverter.catrobat_resource_file_name_for(sound_md5_filename, sound_resource_name))
+        soundinfo.fileName = (mediaconverter.catrobat_resource_file_name_for(sound_md5_filename, sound_resource_name))
         return soundinfo
 
     @staticmethod
@@ -1075,7 +1075,7 @@ class _ScratchObjectConverter(object):
             if isinstance(sprite_startup_look_idx, float):
                 sprite_startup_look_idx = int(round(sprite_startup_look_idx))
             if sprite_startup_look_idx != 0:
-                spriteStartupLook = sprite.getLookDataList()[sprite_startup_look_idx]
+                spriteStartupLook = sprite.getLookList()[sprite_startup_look_idx]
                 set_look_brick = catbricks.SetLookBrick()
                 set_look_brick.setLook(spriteStartupLook)
                 implicit_bricks_to_add += [set_look_brick]
@@ -1199,11 +1199,11 @@ class _ScratchObjectConverter(object):
                     cat_instance.addBrick(brick)
                 else:
                     cat_instance.appendBrickToScript(brick)
-            except TypeError:
+            except TypeError as ex:
                 if isinstance(brick, (str, unicode)):
                     log.error("string brick: %s", brick)
                 else:
-                    log.error("type: %s, value: %s", brick.type, brick.value)
+                    log.error("type: %s, exception: %s", brick.__class__.__name__, ex.message)
                 assert False
         if ignored_blocks > 0:
             log.info("number of ignored Scratch blocks: %d", ignored_blocks)
@@ -1652,7 +1652,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             index_formula_elem = self._converted_helper_brick_or_formula_element([value, 1], "-")
             # 2nd step: consider overflow, i.e. ((value - 1) % number_of_looks)
             #           -> now, the result cannot be out of bounds any more!
-            number_of_looks = len(background_sprite.getLookDataList())
+            number_of_looks = len(background_sprite.getLookList())
             assert number_of_looks > 0
             index_formula_elem = self._converted_helper_brick_or_formula_element([index_formula_elem, number_of_looks], "%")
             # 3rd step: determine look number, i.e. (((value - 1) % number_of_looks) + 1)
@@ -1677,7 +1677,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             set_background_by_index_brick.initializeBrickFields(catrobat.create_formula_with_value(index_formula_elem))
             return set_background_by_index_brick
 
-        matching_looks = [_ for _ in background_sprite.getLookDataList() if _.getLookName() == look_name]
+        matching_looks = [_ for _ in background_sprite.getLookList() if _.getName() == look_name]
         if not matching_looks:
             errormessage = "Background does not contain look with name: {}".format(look_name)
             log.warning(errormessage)
@@ -1704,7 +1704,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             index_formula_elem = self._converted_helper_brick_or_formula_element([value, 1], "-")
             # 2nd step: consider overflow, i.e. ((value - 1) % number_of_looks)
             #           -> now, the result cannot be out of bounds any more!
-            number_of_looks = len(self.sprite.getLookDataList())
+            number_of_looks = len(self.sprite.getLookList())
             assert number_of_looks > 0
             index_formula_elem = self._converted_helper_brick_or_formula_element([value, number_of_looks], "%")
             # 3rd step: determine look number, i.e. (((value - 1) % number_of_looks) + 1)
@@ -1720,7 +1720,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
         if look_name == "previous backdrop":
             return catbricks.PreviousLookBrick()
 
-        matching_looks = [_ for _ in self.sprite.getLookDataList() if _.getLookName() == look_name]
+        matching_looks = [_ for _ in self.sprite.getLookList() if _.getName() == look_name]
         if not matching_looks:
             errormessage = "Background does not contain look with name: {}".format(look_name)
             log.warning(errormessage)
@@ -1766,7 +1766,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             index_formula_elem = self._converted_helper_brick_or_formula_element([value, 1], "-")
             # 2nd step: consider overflow, i.e. ((value - 1) % number_of_looks)
             #           -> now, the result cannot be out of bounds any more!
-            number_of_looks = len(self.sprite.getLookDataList())
+            number_of_looks = len(self.sprite.getLookList())
             assert number_of_looks > 0
             index_formula_elem = self._converted_helper_brick_or_formula_element([index_formula_elem, number_of_looks], "%")
             # 3rd step: determine look number, i.e. (((value - 1) % number_of_looks) + 1)
@@ -1776,9 +1776,9 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
 
         look_name = argument
         assert isinstance(look_name, (str, unicode)), type(look_name)
-        look = next((look for look in self.sprite.getLookDataList() if look.getLookName() == look_name), None)
+        look = next((look for look in self.sprite.getLookList() if look.getName() == look_name), None)
         if look is None:
-            errormessage = "Look name: '%s' not found in sprite '%s'. Available looks: %s replacing Brick with NoteBrick" % (look_name, self.sprite.getName(), ", ".join([look.getLookName() for look in self.sprite.getLookDataList()]))
+            errormessage = "Look name: '%s' not found in sprite '%s'. Available looks: %s replacing Brick with NoteBrick" % (look_name, self.sprite.getName(), ", ".join([look.getName() for look in self.sprite.getLookList()]))
             log.warning(errormessage)
             set_look_brick = catbricks.NoteBrick(errormessage)
             return set_look_brick
@@ -1892,21 +1892,21 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
     @_register_handler(_block_name_to_handler_map, "playSound:")
     def _convert_sound_block(self):
         [sound_name], sound_list = self.arguments, self.sprite.getSoundList()
-        sound_data = {sound_info.getTitle(): sound_info for sound_info in sound_list}.get(sound_name)
+        sound_data = {sound_info.getName(): sound_info for sound_info in sound_list}.get(sound_name)
         if not sound_data:
             raise ConversionError("Sprite does not contain sound with name={}".format(sound_name))
         play_sound_brick = self.CatrobatClass()
-        play_sound_brick.setSoundInfo(sound_data)
+        play_sound_brick.setSound(sound_data)
         return play_sound_brick
 
     @_register_handler(_block_name_to_handler_map, "doPlaySoundAndWait")
     def _convert_sound_and_wait_block(self):
         [sound_name], sound_list = self.arguments, self.sprite.getSoundList()
-        sound_data = {sound_info.getTitle(): sound_info for sound_info in sound_list}.get(sound_name)
+        sound_data = {sound_info.getName(): sound_info for sound_info in sound_list}.get(sound_name)
         if not sound_data:
             raise ConversionError("Sprite does not contain sound with name={}".format(sound_name))
         play_sound_and_wait_brick = self.CatrobatClass()
-        play_sound_and_wait_brick.setSoundInfo(sound_data)
+        play_sound_and_wait_brick.setSound(sound_data)
         return play_sound_and_wait_brick
 
     @_register_handler(_block_name_to_handler_map, "setGraphicEffect:to:")
