@@ -108,7 +108,7 @@ def find_global_user_list_by_name(project, list_name):
     return project.getDefaultScene().getDataContainer().findProjectList(list_name)
 
 def find_sprite_user_list_by_name(project, sprite, list_name):
-    user_lists = project.getDefaultScene().getDataContainer().getSpriteListOfLists(sprite)
+    user_lists = project.getDefaultScene().getDataContainer().getSpriteListMap()[sprite]
     for user_list in user_lists:
         if user_list.getName() == list_name:
             return user_list

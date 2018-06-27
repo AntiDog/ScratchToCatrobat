@@ -625,15 +625,15 @@ class Converter(object):
     def _converted_catrobat_program(self, progress_bar=None, context=None):
         scratch_project = self.scratch_project
         _catr_project = catbase.Project(None, scratch_project.name)
-        _catr_scene = catbase.Scene( CATROBAT_DEFAULT_SCENE_NAME, _catr_project)
-        _catr_project.sceneList.add(_catr_scene)
+        #_catr_scene = catbase.Scene( CATROBAT_DEFAULT_SCENE_NAME, _catr_project)
+        #_catr_project.sceneList.add(_catr_scene)
+        _catr_scene = _catr_project.getDefaultScene()
         ProjectManager.getInstance().setProject(_catr_project)
 
         self._scratch_object_converter = _ScratchObjectConverter(_catr_project, scratch_project,
                                                                  progress_bar, context)
         self._add_global_user_lists_to(_catr_scene)
         self._add_converted_sprites_to(_catr_scene)
-        print _catr_scene.project.sceneList[1].name
         self._add_key_sprites_to(_catr_scene, self.scratch_project.listened_keys)
         self.add_cursor_sprite_to(_catr_scene, context.upcoming_sprites)
         self._update_xml_header(_catr_project.getXmlHeader(), scratch_project.project_id,
@@ -1277,7 +1277,7 @@ class ConvertedProject(object):
         def program_source_for(catrobat_program):
             storage_handler = catio.XstreamSerializer.getInstance()
             code_xml_content = storage_handler.XML_HEADER
-            code_xml_content += storage_handler.xstream.getProjectFromXML(catrobat_program)
+            code_xml_content += storage_handler.xstream.toXML(catrobat_program)
             return code_xml_content
 
         def write_program_source(catrobat_program, context):
