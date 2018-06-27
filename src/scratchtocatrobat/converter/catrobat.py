@@ -78,7 +78,6 @@ def set_as_background(sprite):
 
 
 def is_background_sprite(sprite):
-    print sprite.getName()
     return sprite.getName() == _BACKGROUND_SPRITE_NAME # and sprite.isBackgroundObject
 
 
