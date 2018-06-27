@@ -1737,6 +1737,8 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
         assert len(self.arguments) == 2
         if_begin_brick = catbricks.IfThenLogicBeginBrick(catrobat.create_formula_with_value(self.arguments[0]))
         if_end_brick = catbricks.IfThenLogicEndBrick(if_begin_brick)
+        if_begin_brick.setIfThenEndBrick(if_end_brick)
+        if_end_brick.setIfThenBeginBrick(if_begin_brick)
         if_bricks = self.arguments[1] or []
         assert isinstance(if_bricks, list)
         return [if_begin_brick] + if_bricks + [if_end_brick]
@@ -1750,6 +1752,11 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
         if_bricks, [else_bricks] = self.arguments[1], self.arguments[2:] or [[]]
         if_bricks = if_bricks if if_bricks != None else []
         else_bricks = else_bricks if else_bricks != None else []
+        if_end_brick.setIfBeginBrick(if_begin_brick)
+        if_else_brick.setIfBeginBrick(if_begin_brick)
+        if_begin_brick.setIfElseBrick(if_else_brick)
+        if_else_brick.setIfEndBrick(if_end_brick)
+        if_begin_brick.setIfEndBrick(if_end_brick)
         return [if_begin_brick] + if_bricks + [if_else_brick] + else_bricks + [if_end_brick]
 
     @_register_handler(_block_name_to_handler_map, "lookLike:")
@@ -2214,9 +2221,17 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
                     go_to_brick = self.CatrobatClass(sprite)
                     go_to_brick.spinnerSelection = 82
                     return go_to_brick
+            print "asdf"
+            print self.script_context
+            print self.script_context.sprite_context
+            print self.script_context.sprite_context.context
+            print self.script_context.sprite_context.context.upcoming_sprites
+            print base_sprite
             if base_sprite in self.script_context.sprite_context.context.upcoming_sprites:
+                print "jkl"
                 new_sprite = self.script_context.sprite_context.context.upcoming_sprites[base_sprite]
             else:
+                print "jkl2"
                 new_sprite = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, base_sprite)
                 self.script_context.sprite_context.context.upcoming_sprites[new_sprite.getName()] = new_sprite
 

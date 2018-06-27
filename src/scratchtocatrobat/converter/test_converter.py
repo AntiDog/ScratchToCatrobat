@@ -1454,7 +1454,9 @@ class TestConvertBlocks(common_testing.BaseTestCase):
         assert formula_tree_list_delete_item.value == "1"
         assert formula_tree_list_delete_item.leftChild == None
         assert formula_tree_list_delete_item.rightChild == None
-
+        print catr_brick_list
+        print catr_brick_list[0].loopEndBrick
+        print catr_brick_list[2]
         assert catr_brick_list[0].loopEndBrick == catr_brick_list[2]
         assert catr_brick_list[2].loopBeginBrick == catr_brick_list[0]
 
@@ -2334,6 +2336,8 @@ class TestConvertBlocks(common_testing.BaseTestCase):
         sprite_object = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, "Previous")
         self.test_scene.spriteList.append(sprite_object)
         [catr_brick] = self.block_converter._catrobat_bricks_from(scratch_block, DUMMY_CATR_SPRITE)
+        print "asdfasdfasdf"
+        print catr_brick.getFormulaWithBrickField(catbricks.Brick.BrickField.NOTE).getRoot().value
         assert isinstance(catr_brick, catbricks.GoToBrick)
         assert catr_brick.destinationSprite.getName() == test_sprite_name
         assert catr_brick.destinationSprite is sprite_object
@@ -2344,7 +2348,7 @@ class TestConvertBlocks(common_testing.BaseTestCase):
         scratch_block = ["gotoSpriteOrMouse:", test_sprite_name]
         [catr_brick] = self.block_converter._catrobat_bricks_from(scratch_block, DUMMY_CATR_SPRITE)
         assert isinstance(catr_brick, catbricks.GoToBrick)
-        assert catr_brick.spinnerSelection == 80
+        assert catr_brick.spinnerSelection == catcommon.BrickValues.GO_TO_TOUCH_POSITION
 
     #gotoSpriteOrMouse:
     def test_can_convert_go_to_sprite_block_with_random_position(self):
@@ -2352,7 +2356,7 @@ class TestConvertBlocks(common_testing.BaseTestCase):
         scratch_block = ["gotoSpriteOrMouse:", test_sprite_name]
         [catr_brick] = self.block_converter._catrobat_bricks_from(scratch_block, DUMMY_CATR_SPRITE)
         assert isinstance(catr_brick, catbricks.GoToBrick)
-        assert catr_brick.spinnerSelection == 81
+        assert catr_brick.spinnerSelection == catcommon.BrickValues.GO_TO_RANDOM_POSITION
 
     #pointTowards:
     def test_can_convert_point_towards_block_basic(self):
