@@ -270,7 +270,6 @@ class TestConvertBlocks(common_testing.BaseTestCase):
         scratch_script = scratch.Script([30, 355, [["whenClicked"], ["changeGraphicEffect:by:", "color", 25]]])
         catr_script = self.block_converter._catrobat_script_from(scratch_script, DUMMY_CATR_SPRITE, self.test_project)
         self.assertTrue(isinstance(catr_script, catbase.WhenScript))
-        #self.assertEqual('Tapped', catr_script.getAction())
 
     #whenSensorGreaterThan
     def test_can_convert_when_loudness_greater_than_script_with_formula(self):
@@ -2626,7 +2625,8 @@ class TestConvertProjects(common_testing.ProjectTestCase):
                 scripts = sprite_object.getScriptList()
                 found_show_var = False
                 for script in scripts:
-                    if not isinstance(script, catbase.StartScript): continue
+                    if not isinstance(script, catbase.StartScript):
+                        continue
                     bricks = script.getBrickList()
                     found_show_var = len(filter(lambda brick: isinstance(brick, catbricks.ShowTextBrick) \
                                                 and brick.getUserVariable().getName() == variable, bricks)) > 0

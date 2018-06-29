@@ -315,7 +315,6 @@ additional_serialization_classes:
     - SupportDataContainer
     - BroadcastMessageBrick
     - XstreamSerializer
-    - EventId
 
 
 preserved_interfaces:

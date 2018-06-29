@@ -1154,7 +1154,6 @@ class _ScratchObjectConverter(object):
         for variable_name in local_sprite_variables:
             user_variable = catrobat_scene.getDataContainer().getUserVariable(sprite, variable_name)
             show_variable_brick = catbricks.ShowTextBrick(context.visible_var_X, context.visible_var_Y)
-            show_variable_brick.userVariable.setName(variable_name)
             show_variable_brick.setUserVariable(user_variable)
             context.visible_var_Y -= VISIBLE_VAR_POSITION_STEP_Y
             if context.visible_var_Y <= VISIBLE_VAR_POSITION_THRESHOLD_Y:
