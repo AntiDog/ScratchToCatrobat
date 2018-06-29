@@ -430,7 +430,7 @@ def _create_modified_formula_brick(sensor_type, unconverted_formula, catrobat_pr
 
     else:
         test_project = catbase.Project(None, "__wct_test_project__")
-        test_scene = catbase.Scene(None, "Scene 1", test_project)
+        test_scene = catbase.Scene("Scene 1", test_project)
         test_project.sceneList.add(test_scene)
         tmp_block_conv = _ScratchObjectConverter(test_project, None)
         dummy = _create_catrobat_sprite_stub()
@@ -1800,7 +1800,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
         assert user_variable is not None # the variable must exist at this stage!
         assert user_variable.getName() == variable_name
         show_variable_brick = self.CatrobatClass(0, 0)
-        show_variable_brick.setUserVariableName(variable_name)
+        #show_variable_brick.setUserVariableName(variable_name)
         show_variable_brick.setUserVariable(user_variable)
         return show_variable_brick
 
@@ -1811,7 +1811,7 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
         assert user_variable is not None # the variable must exist at this stage!
         assert user_variable.getName() == variable_name
         hide_variable_brick = self.CatrobatClass()
-        hide_variable_brick.setUserVariableName(variable_name)
+        #hide_variable_brick.setUserVariable(variable_name)
         hide_variable_brick.setUserVariable(user_variable)
         return hide_variable_brick
 
@@ -2216,18 +2216,14 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             go_to_brick = self.CatrobatClass()
             go_to_brick.spinnerSelection = 81 # TODO: these value will change after updating Catroid class hierarchy (see: BrickValues class)
         elif isinstance(base_sprite, basestring):
-            for s in self.scene.spriteList: print s.getName() + "   "
-            print base_sprite
             for sprite in self.scene.spriteList:
                 if sprite.getName() == base_sprite:
                     go_to_brick = self.CatrobatClass(sprite)
                     go_to_brick.spinnerSelection = 82
                     return go_to_brick
             if base_sprite in self.script_context.sprite_context.context.upcoming_sprites:
-                print "jkl"
                 new_sprite = self.script_context.sprite_context.context.upcoming_sprites[base_sprite]
             else:
-                print "jkl2"
                 new_sprite = SpriteFactory().newInstance(SpriteFactory.SPRITE_SINGLE, base_sprite)
                 self.script_context.sprite_context.context.upcoming_sprites[new_sprite.getName()] = new_sprite
 
