@@ -625,8 +625,8 @@ class Converter(object):
     def _converted_catrobat_program(self, progress_bar=None, context=None):
         scratch_project = self.scratch_project
         _catr_project = catbase.Project(None, scratch_project.name)
-        #_catr_scene = catbase.Scene( CATROBAT_DEFAULT_SCENE_NAME, _catr_project)
-        #_catr_project.sceneList.add(_catr_scene)
+        _catr_scene = catbase.Scene( CATROBAT_DEFAULT_SCENE_NAME, _catr_project)
+        _catr_project.sceneList.add(_catr_scene)
         _catr_scene = _catr_project.getDefaultScene()
         ProjectManager.getInstance().setProject(_catr_project)
 
@@ -2216,17 +2216,13 @@ class _BlocksConversionTraverser(scratch.AbstractBlocksTraverser):
             go_to_brick = self.CatrobatClass()
             go_to_brick.spinnerSelection = 81 # TODO: these value will change after updating Catroid class hierarchy (see: BrickValues class)
         elif isinstance(base_sprite, basestring):
+            for s in self.scene.spriteList: print s.getName() + "   "
+            print base_sprite
             for sprite in self.scene.spriteList:
                 if sprite.getName() == base_sprite:
                     go_to_brick = self.CatrobatClass(sprite)
                     go_to_brick.spinnerSelection = 82
                     return go_to_brick
-            print "asdf"
-            print self.script_context
-            print self.script_context.sprite_context
-            print self.script_context.sprite_context.context
-            print self.script_context.sprite_context.context.upcoming_sprites
-            print base_sprite
             if base_sprite in self.script_context.sprite_context.context.upcoming_sprites:
                 print "jkl"
                 new_sprite = self.script_context.sprite_context.context.upcoming_sprites[base_sprite]
